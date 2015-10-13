@@ -68,7 +68,7 @@
 
 ; the function to update the position of an entity based on the gamepad
 (defn update-position [old-state elapsed !axes axis]
-  (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (aget !axes axis) (/ elapsed 2000.0)))))
+  (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (aget !axes axis) (/ elapsed 3000.0)))))
 
 ; update all of the player state depending on the gamepad input
 (defn update-player [gamepad-object old-state elapsed now]
