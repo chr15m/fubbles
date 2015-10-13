@@ -70,6 +70,8 @@
 (defn update-position [old-state elapsed !axes axis]
   (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (aget !axes axis) (/ elapsed 3000.0)))))
 
+
+
 ; update all of the player state depending on the gamepad input
 (defn update-player [gamepad-object old-state elapsed now]
   (let [!axes (.-axes gamepad-object)]

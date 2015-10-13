@@ -1,29 +1,9 @@
 body {
-  font-family: 'Helvetica Neue', Verdana, Helvetica, Arial, sans-serif;
-  max-width: 600px;
-  margin: 0 auto;
-  padding-top: 72px;
-  -webkit-font-smoothing: antialiased;
-  font-size: 1.125em;
-  color: #333;
-  line-height: 1.5em;
+  width: 100%;
+  margin: 0px;
   overflow: hidden;
+  height: 100%;
   background-image: url("../img/bg.png");
-}
-
-h1, h2, h3 {
-  color: #000;
-}
-h1 {
-  font-size: 2.5em
-}
-
-h2 {
-  font-size: 2em
-}
-
-h3 {
-  font-size: 1.5em
 }
 
 a {
@@ -38,7 +18,55 @@ a:hover {
 .sprite {
   display: block;
   position: absolute;
-  border: 1px solid silver;
   margin-top: -25%;
   margin-left: -25%;
 }
+
+/*** infinitelives spinner ***/
+
+.infinitelives-spinner {
+  width: 112px;
+  height: 96px;
+  background-size: 112px 96px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: infinitelives-heartbeat 1.3s ease 0s infinite normal none running;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAABgAQMAAAD/+GSTAAAABlBMVEUAAAD5aQnSkZnaAAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQffCQwDFhf1d1faAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAC9JREFUOMtjYGD4DwQwkmHYc//DAYg9krhgoWHPRY3hkcCFCTAwjBQuOGEzjAguAHqAPO46M2SkAAAAAElFTkSuQmCC);
+}
+
+@-webkit-keyframes infinitelives-heartbeat {
+  0% { opacity: 0.7;
+       transform: scale(1);}
+  5% { opacity: 1;
+       transform: scale(1.2);}
+  25% { opacity: 0.7;
+        transform: scale(1);}
+  32% { opacity: 1;
+        transform: scale(1.2);}
+  100% { opacity: 0.5;
+         transform: scale(0.95);}
+}
+
+@keyframes infinitelives-heartbeat {
+  0% { opacity: 0.7;
+       transform: scale(1);}
+  5% { opacity: 1;
+       transform: scale(1.2);}
+  25% { opacity: 0.7;
+        transform: scale(1);}
+  32% { opacity: 1;
+        transform: scale(1.2);}
+  100% { opacity: 0.5;
+         transform: scale(0.95);}
+}
+
+/* this is optional */
+
+.infinitelives-spinner-vertical-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -56px;
+  margin-top: -48px;
+}
+
