@@ -67,16 +67,20 @@
     entity))
 
 ; the function to update the position of an entity based on the gamepad
-(defn update-position [old-state axes axis]
-  (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (aget axes axis) 0.01))))
+(defn update-position [old-state elapsed !axes axis]
+  (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (aget !axes axis) (/ elapsed 2000.0)))))
+
+; update all of the player state depending on the gamepad input
+(defn update-player [gamepad-object old-state elapsed now]
+  (let [!axes (.-axes gamepad-object)]
+      (if (= (aget !axes 0) 0)
+        old-state
+        (-> old-state (update-position elapsed !axes 0) (update-position elapsed !axes 1)))))
 
 ; function to create a behaviour function that controls the entity with a gamepad
 (defn make-gamepad-behaviour-fn [gamepad-object]
   (fn [old-state elapsed now]
-    (let [axes (.-axes gamepad-object)]
-      (if (= (aget axes 0) 0)
-        old-state
-        (-> old-state (update-position axes 0) (update-position axes 1))))))
+    (update-player gamepad-object old-state elapsed now)))
 
 ; create a single player tied to a gamepad object
 (defn make-player [gamepad-object]
