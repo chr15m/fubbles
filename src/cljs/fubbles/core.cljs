@@ -88,7 +88,7 @@
     (if (not (@players gamepad-index))
       (do
         (log "Making player with gamepad:" gamepad-index)
-        (let [player (make-entity {:img (sprite-url :c-1-1) :pos [0 0] :scale 0.2 :behaviour (make-gamepad-behaviour-fn gamepad-object)})]
+        (let [player (make-entity {:img (sprite-url (str "c-" (+ gamepad-index 1) "-1")) :pos [0 0] :scale 0.2 :behaviour (make-gamepad-behaviour-fn gamepad-object)})]
           (swap! players assoc-in [gamepad-index] player)
           player)))))
 
