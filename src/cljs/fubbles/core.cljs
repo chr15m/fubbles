@@ -30,7 +30,7 @@
 (defn get-time-now [] (.getTime (js/Date.)))
 
 ; make sprite URL
-(defn sprite-url [s] (str "img/" (name s) ".png"))
+(defn sprite-url [s] (str "img/sprites/" (name s) ".png"))
 
 ; turn a position into a CSS "style" declaration
 (defn compute-position-style [{[x y] :pos s :scale}]
