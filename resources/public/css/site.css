@@ -7,6 +7,7 @@ body {
   font-size: 1.125em;
   color: #333;
   line-height: 1.5em;
+  overflow: hidden;
 }
 
 h1, h2, h3 {
@@ -36,4 +37,7 @@ a:hover {
 .sprite {
   display: block;
   position: absolute;
+  border: 1px solid silver;
+  margin-top: -25%;
+  margin-left: -25%;
 }

@@ -38,10 +38,10 @@
   (let [w (.-width @viewport-size)
         h (.-height @viewport-size)
         si (/ 1024.0 (min w h))]
-    {:top (* (- y 0.5) 
-              (/ h 2.0))
-     :left (* (- x 0.5)
-               (/ w 2.0))
+    {:top (mod (+ (* y h) 
+              (/ h 2.0)) h)
+     :left (mod (+ (* x w)
+               (/ w 2.0)) w)
      :transform (str "scale(" (* s si) ")")}))
 
 ; insert a single new entity record into the game state and kick off its control loop
@@ -88,7 +88,7 @@
     (if (not (@players gamepad-index))
       (do
         (log "Making player with gamepad:" gamepad-index)
-        (let [player (make-entity {:img (sprite-url :c-1-1) :pos [0.5 0.5] :scale 0.2 :behaviour (make-gamepad-behaviour-fn gamepad-object)})]
+        (let [player (make-entity {:img (sprite-url :c-1-1) :pos [0 0] :scale 0.2 :behaviour (make-gamepad-behaviour-fn gamepad-object)})]
           (swap! players assoc-in [gamepad-index] player)
           player)))))
 
