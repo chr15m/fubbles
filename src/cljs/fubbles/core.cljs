@@ -33,7 +33,7 @@
 (defn sprite-url [s] (str "img/sprites/" (name s) ".png"))
 
 ; turn a position into a CSS "style" declaration
-(defn compute-position-style [{[x y] :pos s :scale}]
+(defn compute-position-style [{[x y] :pos s :scale f :flip}]
   (print "re-computing position style")
   (let [w (.-width @viewport-size)
         h (.-height @viewport-size)
@@ -42,7 +42,7 @@
               (/ h 2.0)) h)
      :left (mod (+ (* x w)
                (/ w 2.0)) w)
-     :transform (str "scale(" (* s si) ")")}))
+     :transform (str "scale(" (* s si) ") scaleX(" f ")")}))
 
 ; insert a single new entity record into the game state and kick off its control loop
 ; entity-definition = :symbol :color :pos
@@ -66,18 +66,34 @@
     ; return the entity we created
     entity))
 
-; the function to update the position of an entity based on the gamepad
+; change the position of an entity based on the gamepad state
 (defn update-position [old-state elapsed !axes axis]
-  (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (aget !axes axis) (/ elapsed 3000.0)))))
+  (if (= (aget !axes axis) 0)
+    old-state
+    (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (aget !axes axis) (/ elapsed 3000.0))))))
 
+; change the flip direction depending on the gamepad axis
+(defn update-sprite-direction [old-state !axes]
+  (assoc-in old-state [:flip] (cond
+                                (< (aget !axes 0) 0) -1
+                                (> (aget !axes 0) 0) 1
+                                true (old-state :flip))))
 
+; calculation for which sprite frame to show
+(defn calculate-image-frame-url [now index]
+    (let [frame (+ (mod (js/Math.round (/ now (+ 900 (* index 300)))) 2) 1)
+          img-url (sprite-url (str "c-" (+ index 1) "-" frame))]
+      img-url))
+
+; choose which frame to show
+(defn update-animation-frame [old-state now gamepad-index !axes]
+    (assoc-in old-state [:img] (calculate-image-frame-url now gamepad-index)))
 
 ; update all of the player state depending on the gamepad input
 (defn update-player [gamepad-object old-state elapsed now]
-  (let [!axes (.-axes gamepad-object)]
-      (if (= (aget !axes 0) 0)
-        old-state
-        (-> old-state (update-position elapsed !axes 0) (update-position elapsed !axes 1)))))
+  (let [!axes (.-axes gamepad-object)
+        gamepad-index (.-index gamepad-object)]
+    (-> old-state (update-position elapsed !axes 0) (update-position elapsed !axes 1) (update-animation-frame now gamepad-index !axes) (update-sprite-direction !axes))))
 
 ; function to create a behaviour function that controls the entity with a gamepad
 (defn make-gamepad-behaviour-fn [gamepad-object]
@@ -90,7 +106,7 @@
     (if (not (@players gamepad-index))
       (do
         (log "Making player with gamepad:" gamepad-index)
-        (let [player (make-entity {:img (sprite-url (str "c-" (+ gamepad-index 1) "-1")) :pos [0 0] :scale 0.2 :behaviour (make-gamepad-behaviour-fn gamepad-object)})]
+        (let [player (make-entity {:img (calculate-image-frame-url 0 gamepad-index) :pos [0 0] :scale 0.2 :flip 1 :behaviour (make-gamepad-behaviour-fn gamepad-object)})]
           (swap! players assoc-in [gamepad-index] player)
           player)))))
 
