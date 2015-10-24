@@ -21,6 +21,14 @@ a:hover {
   padding: 0px;
 }
 
+.player-cloud {
+  z-index: 50;
+}
+
+.player-sprite {
+  z-index: 100;
+}
+
 #progress-bar {
   height: 3px;
   background-color: #f60;

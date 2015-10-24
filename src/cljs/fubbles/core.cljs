@@ -87,17 +87,22 @@
     ; return the entity we created
     entity))
 
+; average all of the axes available so the user can use any control
+(defn get-axis-value [!axes axis]
+  (reduce + (for [a (range (/ (.-length !axes) 2))]
+    (aget !axes (+ a axis)))))
+
 ; change the position of an entity based on the gamepad state
 (defn update-position [old-state elapsed !axes axis]
-  (if (= (aget !axes axis) 0)
+  (if (= (get-axis-value !axes axis) 0)
     old-state
-    (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (aget !axes axis) (/ elapsed 3000.0))))))
+    (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (get-axis-value !axes axis) (/ elapsed 3000.0))))))
 
 ; change the flip direction depending on the gamepad axis
 (defn update-sprite-direction [old-state !axes]
   (assoc-in old-state [:flip] (cond
-                                (< (aget !axes 0) 0) -1
-                                (> (aget !axes 0) 0) 1
+                                (< (get-axis-value !axes 0) 0) -1
+                                (> (get-axis-value !axes 0) 0) 1
                                 true (old-state :flip))))
 
 ; calculation for which sprite frame to show
@@ -167,7 +172,7 @@
     [:div {:id "game-board"}
       ; DOM "scene grapher"
       (doall (map (fn [[id e]]
-                    [:img.sprite {:src (sprite-url (e :img)) :key id :style (compute-position-style e)}]) 
+                    [:img {:class (str "sprite " (name (e :type)) "-sprite") :src (sprite-url (e :img)) :key id :style (compute-position-style e)}]) 
                   (:entities @game-state)))]])
 
 ; ***** launch ***** ;
@@ -182,7 +187,7 @@
 
 ; add some cloud objects
 (remove-type :cloud)
-(doseq [c (range 15)] (make-cloud))
+(doseq [c (range 10)] (make-cloud))
 
 ; get a handle on our progress bar
 (def progress-bar (.getElementById js/document "progress-bar"))
@@ -203,9 +208,7 @@
                   (do
                     (<! (timeout (* (rnd) 1000)))
                     (let [basename (.replace (last (.split (.-src img) "/")) ".png" "")]
-                      ; (print basename)
-                      (swap! sprites assoc basename img)
-                      (print sprites))
+                      (swap! sprites assoc basename img))
                     (set! progress-bar.style.width (str (Math.round (* (- 1.0 (/ remaining num-urls)) 100.0)) "%"))
                     (recur)))))))
         (print "Finished loading images.")
