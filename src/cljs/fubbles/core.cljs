@@ -141,6 +141,29 @@
 
 (evt/install-gamepad-listener make-player)
 
+; add some cloud objects
+(remove-type :cloud)
+(doseq [c (range 5)] (make-cloud))
+
+; all images from disk
+(def sprite-images (resources-to-urls (get-file-list "resources/public/img/sprites" "png")))
+
+; get a handle on our progress bar
+(def progress-bar (.getElementById js/document "progress-bar"))
+
+; pre-load all of our images
+(defn preload-sprites []
+  (let [c (preload/load-urls (for [[k v] (seq sprite-images)] v))]
+    (go (loop []
+          (let [image-result (<! c)]
+            (when (not (nil? image-result))
+              (let [[progress num-urls remaining img ev] image-result]
+                (if (not (= (.-type ev) "load"))
+                  (print "There was an error loading one of the resources")
+                  (do
+                    (<! (timeout (* (rnd) 1000)))
+                    (set! progress-bar.style.width (str (Math.round (* (- 1.0 (/ remaining num-urls)) 100.0)) "%"))
+                    (recur)))))))
 ; create players as gamepads are added
 (js/window.addEventListener "gamepadconnected" (fn [ev] (log "Gamepad connected:" ev.gamepad.index ev.gamepad.id ev) (log (make-player ev.gamepad))))
 

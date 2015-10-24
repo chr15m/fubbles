@@ -18,6 +18,7 @@
      (include-css (if (env :dev) "css/site.css" "css/site.min.css"))]
     [:body
      [:div#app
+      [:div#progress-bar]
       [:div {:class "infinitelives-spinner infinitelives-spinner-vertical-center"}]]
      (include-js "js/app.js")]]))
 

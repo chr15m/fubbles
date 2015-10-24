@@ -20,6 +20,13 @@ a:hover {
   position: absolute;
   margin-top: -25%;
   margin-left: -25%;
+
+#progress-bar {
+  height: 3px;
+  background-color: #f60;
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }
 
 /*** infinitelives spinner ***/
