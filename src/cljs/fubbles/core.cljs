@@ -149,10 +149,12 @@
 ; create players as gamepads are added
 (js/window.addEventListener "gamepadconnected" (fn [ev] (log "Gamepad connected:" ev.gamepad.index ev.gamepad.id ev) (log (make-player ev.gamepad))))
 
-; launch a go-loop that will just continuously refresh the gamepads
-(go-loop [] (<! (timeout 20)) (js/navigator.getGamepads) (recur))
+(defn mount-root []
+  (print "Mounting react root.")
+  (reagent/render [dom-base] (.getElementById js/document "app")))
 
 ; react init
 (defn init! []
-  (reagent/render [dom-base] (.getElementById js/document "app")))
+  (print "React init.")
+  (preload-sprites))
 
