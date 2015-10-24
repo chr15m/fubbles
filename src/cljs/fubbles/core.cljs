@@ -118,6 +118,21 @@
           (swap! players assoc-in [gamepad-index] player)
           player)))))
 
+; behaviour that a cloud follows
+(defn cloud-behaviour [old-state elapsed now]
+  (-> old-state
+      (update-position elapsed (clj->js (old-state :velocity)) 0)
+      (update-position elapsed (clj->js (old-state :velocity)) 1)))
+
+; select one of the cloud sprites randomly
+(defn choose-cloud []
+  (let [cloud-num (js/Math.round (+ (* 11 (rnd)) 1))]
+    (sprite-url (str "cloud-" cloud-num))))
+
+; create a single cloud object
+(defn make-cloud []
+  (make-entity {:type :cloud :img (choose-cloud) :pos [(- (rnd) 0.5) (- (rnd) 0.5)] :velocity [(* (- (rnd) 0.5) 0.2) (* (- (rnd) 0.5) 0.01)] :scale 0.4 :flip 1 :behaviour cloud-behaviour}))
+
 ; ***** renderer ***** ;
 
 (defn dom-base []
