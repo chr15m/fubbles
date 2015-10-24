@@ -137,7 +137,7 @@
 (swap! viewport-size re-calculate-viewport-size)
 
 ; update the current viewport size if it changes
-(js/window.addEventListener "resize" #(swap! viewport-size (fn [old-viewport-size] (dom/getViewportSize (dom/getWindow)))))
+(js/window.addEventListener "resize" #(swap! viewport-size re-calculate-viewport-size))
 
 (evt/install-gamepad-listener make-player)
 
