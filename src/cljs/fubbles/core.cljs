@@ -35,6 +35,11 @@
 ; make sprite URL
 (defn sprite-url [s] (str "img/sprites/" (name s) ".png"))
 
+; remove all entities of a particular type (useful for livecoding)
+; e.g. :cloud :player :bubble
+(defn remove-type [t]
+  (swap! game-state assoc-in [:entities] (into {} (for [[id e] (@game-state :entities)] (if (not (= (e :type) t)) [id e])))))
+
 ; turn a position into a CSS "style" declaration
 (defn compute-position-style [{[x y] :pos s :scale f :flip}]
   (print "re-computing position style")
