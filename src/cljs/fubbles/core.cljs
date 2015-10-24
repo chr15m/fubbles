@@ -139,12 +139,7 @@
 ; update the current viewport size if it changes
 (js/window.addEventListener "resize" #(swap! viewport-size (fn [old-viewport-size] (dom/getViewportSize (dom/getWindow)))))
 
-; create players for any gamepads that are already connected
-(let [gamepads (js/navigator.getGamepads)]
-  (log "Initial gamepads:" gamepads)
-  (doseq [gamepad-index (range 4)]
-    (let [gamepad-data (aget gamepads gamepad-index)]
-      (if gamepad-data (log (make-player gamepad-data))))))
+(evt/install-gamepad-listener make-player)
 
 ; create players as gamepads are added
 (js/window.addEventListener "gamepadconnected" (fn [ev] (log "Gamepad connected:" ev.gamepad.index ev.gamepad.id ev) (log (make-player ev.gamepad))))
