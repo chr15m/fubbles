@@ -182,10 +182,6 @@
         (print "Finished loading images.")
         (mount-root))))
 
-(defn mount-root []
-  (print "Mounting react root.")
-  (reagent/render [dom-base] (.getElementById js/document "app")))
-
 ; react init
 (defn init! []
   (print "React init.")
