@@ -164,8 +164,8 @@
                     (<! (timeout (* (rnd) 1000)))
                     (set! progress-bar.style.width (str (Math.round (* (- 1.0 (/ remaining num-urls)) 100.0)) "%"))
                     (recur)))))))
-; create players as gamepads are added
-(js/window.addEventListener "gamepadconnected" (fn [ev] (log "Gamepad connected:" ev.gamepad.index ev.gamepad.id ev) (log (make-player ev.gamepad))))
+        (print "Finished loading images.")
+        (mount-root))))
 
 (defn mount-root []
   (print "Mounting react root.")
