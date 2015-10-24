@@ -22,6 +22,9 @@
 
 ; ***** functions section ***** ;
 
+; get a random number
+(defn rnd [] (js/Math.random))
+
 ; inspect browser window for size
 (defn re-calculate-viewport-size [old-viewport-size]
   (dom/getViewportSize (dom/getWindow)))
