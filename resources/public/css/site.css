@@ -15,6 +15,26 @@ a:hover {
   text-decoration: underline;
 }
 
+#title {
+  width: 50%;
+  max-width: 1024px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5%;
+  z-index: 100;
+}
+
+#gamepad {
+  width: 25%;
+  max-width: 800px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5%;
+  z-index: 100;
+}
+
 .sprite {
   display: block;
   position: fixed;

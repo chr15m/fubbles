@@ -170,6 +170,11 @@
 (defn dom-base []
   [:div
     [:div {:id "game-board"}
+      ; if no gamepads are connected then draw the title screen
+     (when (= (count @players) 0)
+       [:span
+         [:img#title {:src "img/sprites/title.png"}]
+         [:img#gamepad {:src "img/sprites/gamepad.png"}]])
       ; DOM "scene grapher"
       (doall (map (fn [[id e]]
                     [:img {:class (str "sprite " (name (e :type)) "-sprite") :src (sprite-url (e :img)) :key id :style (compute-position-style e)}]) 
@@ -206,7 +211,7 @@
                 (if (not (= (.-type ev) "load"))
                   (print "There was an error loading one of the resources")
                   (do
-                    (<! (timeout (* (rnd) 1000)))
+                    (<! (timeout (* (rnd) 200)))
                     (let [basename (.replace (last (.split (.-src img) "/")) ".png" "")]
                       (swap! sprites assoc basename img))
                     (set! progress-bar.style.width (str (Math.round (* (- 1.0 (/ remaining num-urls)) 100.0)) "%"))
