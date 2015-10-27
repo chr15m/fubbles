@@ -49,6 +49,10 @@ a:hover {
   z-index: 50;
 }
 
+.bubble-sprite {
+  z-index: 99;
+}
+
 .player-sprite {
   z-index: 100;
 }

@@ -23,6 +23,7 @@
 (defonce viewport-size (atom {}))
 (defonce players (atom {}))
 (defonce sprites (atom {}))
+(defonce game-iteration (atom 0))
 
 ; all images from disk
 (def sprite-images (resources-to-urls (get-file-list "resources/public/img/sprites" "png")))
@@ -31,6 +32,8 @@
 
 ; get a random number
 (defn rnd [] (js/Math.random))
+
+(defn rnd-bool [] (if (> (rnd) 0.5) 1 0))
 
 ; inspect browser window for size
 (defn re-calculate-viewport-size [old-viewport-size]
@@ -46,6 +49,10 @@
 ; e.g. :cloud :player :bubble
 (defn remove-type [t]
   (swap! game-state assoc-in [:entities] (into {} (for [[id e] (@game-state :entities)] (if (not (= (e :type) t)) [id e])))))
+
+; counte all entities of a particular type
+(defn get-type [t]
+  (into {} (for [[id e] (@game-state :entities)] (if (= (e :type) t) [id e]))))
 
 ; turn a position into a CSS "style" declaration
 (defn compute-position-style [{[x y] :pos s :scale f :flip v :visibility i :img}]
@@ -161,9 +168,39 @@
   (let [cloud-num (js/Math.round (+ (* 11 (rnd)) 1))]
     (str "cloud-" cloud-num)))
 
+(defn random-velocity [] [(* (- (rnd) 0.5) 0.2) (* (- (rnd) 0.5) 0.01)])
+
 ; create a single cloud object
 (defn make-cloud []
-  (make-entity {:type :cloud :img (choose-cloud) :pos [(* (- (rnd) 0.5) 2) (* (- (rnd) 0.5) 2)] :velocity [(* (- (rnd) 0.5) 0.2) (* (- (rnd) 0.5) 0.01)] :scale 0.4 :flip 1 :behaviour cloud-behaviour}))
+  (make-entity {:type :cloud :img (choose-cloud) :pos [(* (- (rnd) 0.5) 2) (* (- (rnd) 0.5) 2)] :velocity (random-velocity) :scale 0.4 :flip 1 :behaviour cloud-behaviour}))
+
+; select one of the bubble sprites randomly
+(defn choose-bubble []
+  (let [bubble-num (js/Math.round (+ (* 7 (rnd)) 1))]
+    (str "b-" bubble-num)))
+
+; choose a random positon from the edge of the screen
+(defn random-edge-position []
+  (let [edge (- (* (rnd-bool) 2) 1)]
+    (if (= (rnd-bool) 0) [edge (rnd)] [(rnd) edge])))
+
+; create a single bubble object
+(defn make-bubble []
+  (make-entity {:type :bubble :img (choose-bubble) :pos (random-edge-position) :velocity [(* (- (rnd) 0.5) 0.5) (* (- (rnd) 0.5) 0.5)] :scale (+ (* (rnd) 0.5) 0.25) :flip 1 :behaviour cloud-behaviour}))
+
+; every so often check if we should create a new bubble
+(defn bubble-creation-timer [iteration]
+  (go-loop []
+    (<! (timeout 1000))
+    (if (and
+             ; and there are players already connected
+             (> (count @players) 0)
+             ; randomly with decreasing probability the more there are
+             (> (rnd) (/ (count (get-type :bubble)) 10.0)))
+        (make-bubble))
+    ; this makes it reloadable
+    (if (= iteration @game-iteration)
+      (recur))))
 
 ; ***** renderer ***** ;
 
@@ -190,15 +227,21 @@
 
 (evt/install-gamepad-listener make-player)
 
-; add some cloud objects
-(remove-type :cloud)
-(doseq [c (range 10)] (make-cloud))
+(defn game-init []
+  (print "Game init.")
+  (remove-type :cloud)
+  (remove-type :bubble)
+  ; add some cloud objects
+  (doseq [c (range 10)] (make-cloud))
+  (swap! game-iteration inc)
+  (bubble-creation-timer @game-iteration))
 
 ; get a handle on our progress bar
 (def progress-bar (.getElementById js/document "progress-bar"))
 
 (defn mount-root []
   (print "Mounting react root.")
+  (game-init)
   (reagent/render [dom-base] (.getElementById js/document "app")))
 
 ; pre-load all of our images
