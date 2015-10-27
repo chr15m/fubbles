@@ -172,7 +172,7 @@
     [:div {:id "game-board"}
       ; if no gamepads are connected then draw the title screen
      (when (= (count @players) 0)
-       [:span
+       [:span#overlay
          [:img#title {:src "img/sprites/title.png"}]
          [:img#gamepad {:src "img/sprites/gamepad.png"}]])
       ; DOM "scene grapher"

@@ -22,7 +22,6 @@ a:hover {
   margin-left: auto;
   margin-right: auto;
   margin-top: 5%;
-  z-index: 100;
 }
 
 #gamepad {
@@ -32,7 +31,12 @@ a:hover {
   margin-left: auto;
   margin-right: auto;
   margin-top: 5%;
+}
+
+#overlay {
+  position: absolute;
   z-index: 100;
+  width: 100%;
 }
 
 .sprite {
@@ -41,7 +45,7 @@ a:hover {
   padding: 0px;
 }
 
-.player-cloud {
+.cloud-sprite {
   z-index: 50;
 }
 
