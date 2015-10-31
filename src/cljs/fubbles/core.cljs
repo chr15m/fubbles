@@ -9,6 +9,7 @@
               [infinitelives.utils.events :as evt]
               [infinitelives.utils.preload :as preload]
               [infinitelives.utils.file :refer [resources-to-urls]]
+              [infinitelives.utils.dom :refer [collision-test-by-id]]
               [cljs.core.async :refer [chan <! >! put! close! timeout]])
     (:require-macros [cljs.core.async.macros :refer [go go-loop]]
                      [infinitelives.utils.file :refer [get-file-list]])
@@ -70,24 +71,12 @@
      :height (str (Math.round ih) "px")
      :transform (str "scaleX(" f ")")}))
 
-; get a particular entity's bounds from the dom
-(defn get-bounds [id]
-  (.getBoundingClientRect (js/document.getElementById id)))
-
-; determine if two dom elements are colliding
-(defn collision-test-by-id [id-a id-b]
-  (let [bounds-a (get-bounds id-a)
-        bounds-b (get-bounds id-b)]
-    (not (or (< bounds-a.right bounds-b.left)
-             (> bounds-a.left bounds-b.right)
-             (< bounds-a.bottom bounds-b.top)
-             (> bounds-a.top bounds-b.bottom)))))
-
 ; get a list of collision-type that are entity is currently colliding
 (defn get-collision-between [entity collision-type]
-  (doall (filter (fn [[id other]]
-                   (collision-test-by-id (entity :id) id))
-                 (get-type collision-type))))
+  (when (not (= (entity :visibility) :invisible))
+    (doall (filter (fn [[id other]]
+                     (collision-test-by-id (entity :id) id))
+                   (get-type collision-type)))))
 
 ; insert a single new entity record into the game state and kick off its control loop
 ; entity-definition = :img :pos :type :scale :flip etc.
