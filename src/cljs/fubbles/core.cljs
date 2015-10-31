@@ -96,7 +96,7 @@
 ; average all of the axes available so the user can use any control
 (defn get-axis-value [!axes axis]
   (reduce + (for [a (range (/ (.-length !axes) 2))]
-    (aget !axes (+ a axis)))))
+    (aget !axes (+ (* a 2) axis)))))
 
 ; change the position of an entity based on the gamepad state
 (defn update-position [old-state elapsed !axes axis]
