@@ -224,8 +224,6 @@
 ; update the current viewport size if it changes
 (js/window.addEventListener "resize" #(swap! viewport-size re-calculate-viewport-size))
 
-(evt/install-gamepad-listener make-player!)
-
 (defn game-init []
   (print "Game init.")
   (remove-type! :cloud)
@@ -259,7 +257,11 @@
                     (set! progress-bar.style.width (str (Math.round (* (- 1.0 (/ remaining num-urls)) 100.0)) "%"))
                     (recur)))))))
         (print "Finished loading images.")
-        (mount-root))))
+        ; start rendering
+        (mount-root)
+        ; listen for gamepads
+        (evt/install-gamepad-listener make-player!))))
+
 
 ; react init
 (defn init! []
