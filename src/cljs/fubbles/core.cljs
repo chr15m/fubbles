@@ -126,7 +126,7 @@
   (assoc-in old-state [:visibility] visibility))
 
 ; update all of the player state depending on the gamepad input
-(defn update-player [gamepad-object old-state elapsed now]
+(defn update-player [old-state gamepad-object elapsed now]
   (if-let [gamepad @gamepad-object]
     (let [!axes (.-axes gamepad)
           gamepad-index (.-index gamepad)]
@@ -142,7 +142,7 @@
 ; function to create a behaviour function that controls the entity with a gamepad
 (defn make-gamepad-behaviour-fn [gamepad-object]
   (fn [old-state elapsed now]
-    (update-player gamepad-object old-state elapsed now)))
+    (update-player old-state gamepad-object elapsed now)))
 
 ; create a single player tied to a gamepad object
 (defn make-player! [gamepad-index gamepad-object]
