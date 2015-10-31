@@ -61,7 +61,6 @@
         sm (min w h)
         iw (* (.-width (get @sprites i)) s)
         ih (* (.-height (get @sprites i)) s)]
-    ; (print (.-width (get @sprites i)))
     {:left (- (mod (+ (* x sm)
                (/ w 2.0)) (+ w iw)) iw)
      :top (- (mod (+ (* y sm)
@@ -139,10 +138,16 @@
     ; set the player to invisible if their gamepad is disconnected
     (update-visibility old-state :invisible)))
 
+; update any sprite's position and style
+(defn update-position-style [old-state]
+  (assoc-in old-state [:style] (compute-position-style old-state)))
+
 ; function to create a behaviour function that controls the entity with a gamepad
 (defn make-gamepad-behaviour-fn [gamepad-object]
   (fn [old-state elapsed now]
-    (update-player old-state gamepad-object elapsed now)))
+    (-> old-state
+      (update-player gamepad-object elapsed now)
+      (update-position-style))))
 
 ; create a single player tied to a gamepad object
 (defn make-player! [gamepad-index gamepad-object]
@@ -160,7 +165,8 @@
 (defn cloud-behaviour [old-state elapsed now]
   (-> old-state
       (update-position elapsed (clj->js (old-state :velocity)) 0)
-      (update-position elapsed (clj->js (old-state :velocity)) 1)))
+      (update-position elapsed (clj->js (old-state :velocity)) 1)
+      (update-position-style)))
 
 ; select one of the cloud sprites randomly
 (defn choose-cloud []
@@ -213,7 +219,7 @@
          [:img#gamepad {:src "img/sprites/gamepad.png"}]])
       ; DOM "scene grapher"
       (doall (map (fn [[id e]]
-                    [:img {:class (str "sprite " (name (e :type)) "-sprite") :src (sprite-url (e :img)) :key id :style (compute-position-style e)}]) 
+                    [:img {:class (str "sprite " (name (e :type)) "-sprite") :src (sprite-url (e :img)) :key id :style (e :style)}]) 
                   (:entities @game-state)))]])
 
 ; ***** launch ***** ;
