@@ -70,6 +70,21 @@
      :height (str (Math.round ih) "px")
      :transform (str "scaleX(" f ")")}))
 
+; get a particular entity's bounds from the dom
+(defn get-bounds [e]
+  (.getBoundingClientRect (js/document.getElementById (e :id))))
+
+; get a list of collision-type that are entity is currently colliding
+(defn get-collision-between [entity collision-type]
+  (doall (filter (fn [[id other]]
+           (let [bounds-a (get-bounds entity)
+                 bounds-b (get-bounds other)]
+             (not (or (< bounds-a.right bounds-b.left)
+                      (> bounds-a.left bounds-b.right)
+                      (< bounds-a.bottom bounds-b.top)
+                      (> bounds-a.top bounds-b.bottom)))))
+                 (get-type collision-type))))
+
 ; insert a single new entity record into the game state and kick off its control loop
 ; entity-definition = :img :pos :type :scale :flip etc.
 (defn make-entity! [entity-definition]
