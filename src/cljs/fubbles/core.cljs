@@ -25,6 +25,7 @@
 (defonce players (atom {}))
 (defonce sprites (atom {}))
 (defonce game-iteration (atom 0))
+(def dead-entities (atom {}))
 
 ; all images from disk
 (def sprite-image-files (resources-to-urls (get-file-list "resources/public/img/sprites" "png")))
@@ -75,7 +76,8 @@
 (defn get-collision-between [entity collision-type]
   (when (not (= (entity :visibility) :invisible))
     (doall (filter (fn [[id other]]
-                     (collision-test-by-id (entity :id) id))
+                     (if (js/document.getElementById id)
+                       (collision-test-by-id (entity :id) id)))
                    (get-type collision-type)))))
 
 ; insert a single new entity record into the game state and kick off its control loop
@@ -91,12 +93,21 @@
       (let [now (get-time-now)
             elapsed (- now last-time)]
         ; update this entity's properties according to its behaviour function
-        (let [behaviour-fn (get-in @game-state [:entities id :behaviour])]
-          (if (not (nil? behaviour-fn))
-            (swap! game-state update-in [:entities id] behaviour-fn elapsed now)))
-        ; run every 20 milliseconds
-        (<! (timeout 20))
-        (recur now)))
+        (if-let [entity (get-in @game-state [:entities id])]
+          (let [behaviour-fn (entity :behaviour)
+                entity-died (contains? @dead-entities id)]
+            (if (not entity-died)
+              (do
+                (when (not (nil? behaviour-fn))
+                  (swap! game-state update-in [:entities id] behaviour-fn elapsed now))
+                ; run every 20 milliseconds
+                (<! (timeout 20))
+                (recur now))
+              ; entity is dead, dissasoc them
+              (do
+                (print "killing" id)
+                (swap! game-state update-in [:entities] dissoc id)
+                (swap! dead-entities dissoc id)))))))
     ; return the entity we created
     entity))
 
@@ -153,9 +164,14 @@
 ; function to create a behaviour function that controls the entity with a gamepad
 (defn make-gamepad-behaviour-fn [gamepad-object]
   (fn [old-state elapsed now]
-    (-> old-state
+    (let [result (-> old-state
       (update-player gamepad-object elapsed now)
-      (update-position-style))))
+      (update-position-style))]
+      ; test for collisions with bubbles
+      (doseq [[id e] (get-collision-between result :bubble)]
+        ; kill the bubble dead
+        (swap! dead-entities assoc id true))
+      result)))
 
 ; create a single player tied to a gamepad object
 (defn make-player! [gamepad-index gamepad-object]
@@ -227,7 +243,7 @@
          [:img#gamepad {:src "img/sprites/gamepad.png"}]])
       ; DOM "scene grapher"
       (doall (map (fn [[id e]]
-                    [:img {:class (str "sprite " (name (e :type)) "-sprite") :src (sprite-url (e :img)) :key id :style (e :style)}]) 
+                    [:img {:id id :class (str "sprite " (name (e :type)) "-sprite") :src (sprite-url (e :img)) :key id :style (e :style)}]) 
                   (:entities @game-state)))]])
 
 ; ***** launch ***** ;
