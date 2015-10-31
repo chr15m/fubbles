@@ -81,14 +81,14 @@
       [:entities id] (entity id))
     ; kick off the entity's control loop
     (go-loop [last-time (get-time-now)]
-      ; run every 20 milliseconds
-      (<! (timeout 20))
       (let [now (get-time-now)
             elapsed (- now last-time)]
         ; update this entity's properties according to its behaviour function
         (let [behaviour-fn (get-in @game-state [:entities id :behaviour])]
           (if (not (nil? behaviour-fn))
             (swap! game-state update-in [:entities id] behaviour-fn elapsed now)))
+        ; run every 20 milliseconds
+        (<! (timeout 20))
         (recur now)))
     ; return the entity we created
     entity))
