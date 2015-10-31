@@ -26,7 +26,7 @@
 (defonce game-iteration (atom 0))
 
 ; all images from disk
-(def sprite-images (resources-to-urls (get-file-list "resources/public/img/sprites" "png")))
+(def sprite-image-files (resources-to-urls (get-file-list "resources/public/img/sprites" "png")))
 
 ; ***** functions section ***** ;
 
@@ -47,10 +47,10 @@
 
 ; remove all entities of a particular type (useful for livecoding)
 ; e.g. :cloud :player :bubble
-(defn remove-type [t]
+(defn remove-type! [t]
   (swap! game-state assoc-in [:entities] (into {} (for [[id e] (@game-state :entities)] (if (not (= (e :type) t)) [id e])))))
-
-; counte all entities of a particular type
+ 
+; count all entities of a particular type
 (defn get-type [t]
   (into {} (for [[id e] (@game-state :entities)] (if (= (e :type) t) [id e]))))
 
@@ -59,7 +59,6 @@
   (let [w (.-width @viewport-size)
         h (.-height @viewport-size)
         sm (min w h)
-        si (/ sm 1024.0)
         iw (* (.-width (get @sprites i)) s)
         ih (* (.-height (get @sprites i)) s)]
     ; (print (.-width (get @sprites i)))
@@ -74,7 +73,7 @@
 
 ; insert a single new entity record into the game state and kick off its control loop
 ; entity-definition = :img :pos :type :scale :flip etc.
-(defn make-entity [entity-definition]
+(defn make-entity! [entity-definition]
   (let [id (uuid/uuid-string (uuid/make-random-uuid))
         entity {id (assoc entity-definition :id id :chan (chan) :visibility :visible)}]
     ; swap the new entity definition into our game state
@@ -146,14 +145,14 @@
     (update-player gamepad-object old-state elapsed now)))
 
 ; create a single player tied to a gamepad object
-(defn make-player [gamepad-index gamepad-object]
+(defn make-player! [gamepad-index gamepad-object]
   (log "Gamepad callback" gamepad-index @gamepad-object)
   (if @gamepad-object
     (let [gamepad-index (.-index @gamepad-object)]
       (if (not (@players gamepad-index))
         (do
           (log "Making player with gamepad:" gamepad-index)
-          (let [player (make-entity {:type :player :img (calculate-player-image-frame-name 0 gamepad-index) :pos [0 0] :scale 0.2 :flip 1 :behaviour (make-gamepad-behaviour-fn gamepad-object) :gamepad-object gamepad-object})]
+          (let [player (make-entity! {:type :player :img (calculate-player-image-frame-name 0 gamepad-index) :pos [0 0] :scale 0.2 :flip 1 :behaviour (make-gamepad-behaviour-fn gamepad-object) :gamepad-object gamepad-object})]
             (swap! players assoc-in [gamepad-index] player)
             player))))))
 
@@ -172,7 +171,7 @@
 
 ; create a single cloud object
 (defn make-cloud []
-  (make-entity {:type :cloud :img (choose-cloud) :pos [(* (- (rnd) 0.5) 2) (* (- (rnd) 0.5) 2)] :velocity (random-velocity) :scale 0.4 :flip 1 :behaviour cloud-behaviour}))
+  (make-entity! {:type :cloud :img (choose-cloud) :pos [(* (- (rnd) 0.5) 2) (* (- (rnd) 0.5) 2)] :velocity (random-velocity) :scale 0.4 :flip 1 :behaviour cloud-behaviour}))
 
 ; select one of the bubble sprites randomly
 (defn choose-bubble []
@@ -186,7 +185,7 @@
 
 ; create a single bubble object
 (defn make-bubble []
-  (make-entity {:type :bubble :img (choose-bubble) :pos (random-edge-position) :velocity [(* (- (rnd) 0.5) 0.5) (* (- (rnd) 0.5) 0.5)] :scale (+ (* (rnd) 0.5) 0.25) :flip 1 :behaviour cloud-behaviour}))
+  (make-entity! {:type :bubble :img (choose-bubble) :pos (random-edge-position) :velocity [(* (- (rnd) 0.5) 0.5) (* (- (rnd) 0.5) 0.5)] :scale (+ (* (rnd) 0.5) 0.25) :flip 1 :behaviour cloud-behaviour}))
 
 ; every so often check if we should create a new bubble
 (defn bubble-creation-timer [iteration]
@@ -225,12 +224,12 @@
 ; update the current viewport size if it changes
 (js/window.addEventListener "resize" #(swap! viewport-size re-calculate-viewport-size))
 
-(evt/install-gamepad-listener make-player)
+(evt/install-gamepad-listener make-player!)
 
 (defn game-init []
   (print "Game init.")
-  (remove-type :cloud)
-  (remove-type :bubble)
+  (remove-type! :cloud)
+  (remove-type! :bubble)
   ; add some cloud objects
   (doseq [c (range 10)] (make-cloud))
   (swap! game-iteration inc)
@@ -245,8 +244,8 @@
   (reagent/render [dom-base] (.getElementById js/document "app")))
 
 ; pre-load all of our images
-(defn preload-sprites []
-  (let [c (preload/load-urls (for [[k v] (seq sprite-images)] v))]
+(defn preload-sprites! []
+  (let [c (preload/load-urls (for [[k v] (seq sprite-image-files)] v))]
     (go (loop []
           (let [image-result (<! c)]
             (when (not (nil? image-result))
@@ -265,5 +264,5 @@
 ; react init
 (defn init! []
   (print "React init.")
-  (preload-sprites))
+  (preload-sprites!))
 
