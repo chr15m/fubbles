@@ -163,6 +163,25 @@
 (defn update-position-style [old-state]
   (assoc-in old-state [:style] (compute-position-style old-state)))
 
+; behaviour of the pop (self kill)
+(defn pop-behaviour [old-state elapsed now]
+  (if (> (- now (old-state :birth)) 500)
+    (swap! dead-entities assoc (old-state :id) true))
+  (update-position-style old-state))
+
+; create a single bubble-pop object
+(defn make-pop [position scale]
+  (print "make-pop" position scale)
+  ; select one of the pop sprites randomly
+  (make-entity! {:type :pop
+                 :img (str "pop-" (+ (js/Math.floor (* 2 (rnd))) 1))
+                 :pos position
+                 :velocity [0 0]
+                 :scale scale
+                 :flip 1
+                 :birth (get-time-now)
+                 :behaviour pop-behaviour}))
+
 ; function to create a behaviour function that controls the entity with a gamepad
 (defn make-gamepad-behaviour-fn [gamepad-object]
   (fn [old-state elapsed now]
@@ -171,6 +190,11 @@
       (update-position-style))]
       ; test for collisions with bubbles
       (doseq [[id e] (get-collision-between result :bubble)]
+        ; make a pop
+        (let [pop-scale (e :scale) pop-pos (e :pos)]
+          (go
+            (<! (timeout 100))
+            (make-pop pop-pos pop-scale)))
         ; kill the bubble dead
         (swap! dead-entities assoc id true))
       result)))
