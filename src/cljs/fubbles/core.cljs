@@ -185,6 +185,13 @@
                  :birth (get-time-now)
                  :behaviour pop-behaviour}))
 
+; play a pop sound
+(defn play-pop-sound []
+  (let [winning (< (count (get-type :bubble)) 3)
+        sfx-id (str (if winning "f" "p") "-" (+ (js/Math.floor (* (rnd) (if winning 14 8))) 1))]
+    (print "sfx" sfx-id)
+    (.play (js/document.getElementById sfx-id))))
+
 ; function to create a behaviour function that controls the entity with a gamepad
 (defn make-gamepad-behaviour-fn [gamepad-object]
   (fn [old-state elapsed now]
@@ -197,7 +204,8 @@
         (let [pop-scale (e :scale) pop-pos (e :pos)]
           (go
             (<! (timeout 100))
-            (.play (js/document.getElementById (str "f-" (+ (js/Math.floor (* (rnd) 15)) 1))))
+            ; play a sound (pop if greater than 5 bubbles on the screen)
+            (play-pop-sound)
             (make-pop pop-pos pop-scale)))
         ; kill the bubble dead
         (swap! dead-entities assoc id true))
