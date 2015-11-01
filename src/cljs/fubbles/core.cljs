@@ -29,6 +29,8 @@
 
 ; all images from disk
 (def sprite-image-files (resources-to-urls (get-file-list "resources/public/img/sprites" "png")))
+(def sfx-files (resources-to-urls (get-file-list "resources/public/sfx" ".ogg")))
+
 
 (def num-bubbles (count (filter #(= (.indexOf (name %) "b-") 0) (keys sprite-image-files))))
 
@@ -195,6 +197,7 @@
         (let [pop-scale (e :scale) pop-pos (e :pos)]
           (go
             (<! (timeout 100))
+            (.play (js/document.getElementById (str "f-" (+ (js/Math.floor (* (rnd) 15)) 1))))
             (make-pop pop-pos pop-scale)))
         ; kill the bubble dead
         (swap! dead-entities assoc id true))
@@ -281,6 +284,7 @@
 
 (defn dom-base []
   [:div
+    [:div {:id "audio"} (doall (for [[id url] sfx-files] [:audio {:id id :key id} [:source {:type "audio/ogg" :src url}] [:source {:type "audio/mpeg" :src (.replace url ".ogg" ".mp3")}]]))]
     [:div {:id "game-board"}
       ; if no gamepads are connected then draw the title screen
      (when (= (count @players) 0)
