@@ -30,6 +30,8 @@
 ; all images from disk
 (def sprite-image-files (resources-to-urls (get-file-list "resources/public/img/sprites" "png")))
 
+(def num-bubbles (count (filter #(= (.indexOf (name %) "b-") 0) (keys sprite-image-files))))
+
 ; ***** functions section ***** ;
 
 ; get a random number
@@ -136,7 +138,7 @@
     img-name))
 
 ; choose which frame to show
-(defn update-animation-frame [old-state now gamepad-index !axes]
+(defn update-player-animation-frame [old-state now gamepad-index !axes]
   (assoc-in old-state [:img] (calculate-player-image-frame-name now gamepad-index)))
 
 ; set the visibility flag
@@ -152,7 +154,7 @@
           (update-position elapsed !axes 0)
           (update-position elapsed !axes 1)
           (update-visibility :visible)
-          (update-animation-frame now gamepad-index !axes)
+          (update-player-animation-frame now gamepad-index !axes)
           (update-sprite-direction !axes)))
     ; set the player to invisible if their gamepad is disconnected
     (update-visibility old-state :invisible)))
@@ -203,19 +205,38 @@
 (defn make-cloud []
   (make-entity! {:type :cloud :img (choose-cloud) :pos [(* (- (rnd) 0.5) 2) (* (- (rnd) 0.5) 2)] :velocity (random-velocity) :scale 0.4 :flip 1 :behaviour cloud-behaviour}))
 
-; select one of the bubble sprites randomly
-(defn choose-bubble []
-  (let [bubble-num (js/Math.round (+ (* 7 (rnd)) 1))]
-    (str "b-" bubble-num)))
-
 ; choose a random positon from the edge of the screen
 (defn random-edge-position []
   (let [edge (- (* (rnd-bool) 2) 1)]
     (if (= (rnd-bool) 0) [edge (rnd)] [(rnd) edge])))
 
+(defn update-bubble-animation-frame [old-state now f]
+  (let [frame-num (+ (* 2 (old-state :bubble-num))
+                          (mod (js/Math.round (/ now (+ 200 (* f 500)))) 2))]
+    (assoc-in old-state [:img] (str "b-" (+ frame-num 1)))))
+
+; behaviour that a bubble follows
+(defn make-bubble-behaviour-fn []
+  (let [f (rnd)]
+    (fn [old-state elapsed now]
+      (-> old-state
+          (update-position elapsed (clj->js (old-state :velocity)) 0)
+          (update-position elapsed (clj->js (old-state :velocity)) 1)
+          (update-bubble-animation-frame now f)
+          (update-position-style)))))
+
 ; create a single bubble object
 (defn make-bubble []
-  (make-entity! {:type :bubble :img (choose-bubble) :pos (random-edge-position) :velocity [(* (- (rnd) 0.5) 0.5) (* (- (rnd) 0.5) 0.5)] :scale (+ (* (rnd) 0.5) 0.25) :flip 1 :behaviour cloud-behaviour}))
+  ; select one of the bubble sprites randomly
+  (let [bubble-num (js/Math.floor (* 4 (rnd)))]
+    (make-entity! {:type :bubble
+                   :img (str "b-" bubble-num)
+                   :bubble-num bubble-num
+                   :pos (random-edge-position)
+                   :velocity [(* (- (rnd) 0.5) 0.5) (* (- (rnd) 0.5) 0.5)]
+                   :scale (+ (* (rnd) 0.5) 0.25)
+                   :flip 1
+                   :behaviour (make-bubble-behaviour-fn)})))
 
 ; every so often check if we should create a new bubble
 (defn bubble-creation-timer [iteration]
