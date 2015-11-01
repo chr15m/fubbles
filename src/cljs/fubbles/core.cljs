@@ -62,13 +62,14 @@
 (defn compute-position-style [{[x y] :pos s :scale f :flip v :visibility i :img}]
   (let [w (.-width @viewport-size)
         h (.-height @viewport-size)
-        sm (min w h)
-        iw (* (.-width (get @sprites i)) s)
-        ih (* (.-height (get @sprites i)) s)]
-    {:left (- (mod (+ (* x sm)
-               (/ w 2.0)) (+ w iw)) iw)
-     :top (- (mod (+ (* y sm)
-              (/ h 2.0)) (+ h ih)) ih)
+        r (/ (min w h) (max w h))
+        rv (/ (min w h) 2048)
+        iw (* (.-width (get @sprites i)) (* s rv))
+        ih (* (.-height (get @sprites i)) (* s rv))
+        sx (- (* (/ (mod (+ (* x rv) 1) 2) 2) (+ w iw)) iw)
+        sy (- (* (/ (mod (+ (* y rv) 1) 2) 2) (+ h ih)) ih)]
+    {:left sx
+     :top sy
      :display (case v :visible "block" :invisible "none")
      :width (str (Math.round iw) "px")
      :height (str (Math.round ih) "px")
@@ -122,7 +123,7 @@
 (defn update-position [old-state elapsed !axes axis]
   (if (= (get-axis-value !axes axis) 0)
     old-state
-    (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (get-axis-value !axes axis) (/ elapsed 3000.0))))))
+    (assoc-in old-state [:pos axis] (+ (get (old-state :pos) axis) (* (get-axis-value !axes axis) (/ elapsed 1500.0))))))
 
 ; change the flip direction depending on the gamepad axis
 (defn update-sprite-direction [old-state !axes]
@@ -207,7 +208,7 @@
       (if (not (@players gamepad-index))
         (do
           (log "Making player with gamepad:" gamepad-index)
-          (let [player (make-entity! {:type :player :img (calculate-player-image-frame-name 0 gamepad-index) :pos [0 0] :scale 0.2 :flip 1 :behaviour (make-gamepad-behaviour-fn gamepad-object) :gamepad-object gamepad-object})]
+          (let [player (make-entity! {:type :player :img (calculate-player-image-frame-name 0 gamepad-index) :pos [0 0] :scale 0.4 :flip 1 :behaviour (make-gamepad-behaviour-fn gamepad-object) :gamepad-object gamepad-object})]
             (swap! players assoc-in [gamepad-index] player)
             player))))))
 
@@ -223,11 +224,11 @@
   (let [cloud-num (js/Math.round (+ (* 11 (rnd)) 1))]
     (str "cloud-" cloud-num)))
 
-(defn random-velocity [] [(* (- (rnd) 0.5) 0.2) (* (- (rnd) 0.5) 0.01)])
+(defn random-velocity [] [(* (- (rnd) 0.5) 0.4) (* (- (rnd) 0.5) 0.02)])
 
 ; create a single cloud object
 (defn make-cloud []
-  (make-entity! {:type :cloud :img (choose-cloud) :pos [(* (- (rnd) 0.5) 2) (* (- (rnd) 0.5) 2)] :velocity (random-velocity) :scale 0.4 :flip 1 :behaviour cloud-behaviour}))
+  (make-entity! {:type :cloud :img (choose-cloud) :pos [(* (- (rnd) 0.5) 2) (* (- (rnd) 0.5) 2)] :velocity (random-velocity) :scale 0.8 :flip 1 :behaviour cloud-behaviour}))
 
 ; choose a random positon from the edge of the screen
 (defn random-edge-position []
@@ -257,8 +258,8 @@
                    :img (str "b-" bubble-num)
                    :bubble-num bubble-num
                    :pos (random-edge-position)
-                   :velocity [(* (- (rnd) 0.5) 0.5) (* (- (rnd) 0.5) 0.5)]
-                   :scale (+ (* (rnd) 0.5) 0.25)
+                   :velocity [(- (rnd) 0.5) (- (rnd) 0.5)]
+                   :scale (+ (rnd) 0.25)
                    :flip 1
                    :behaviour (make-bubble-behaviour-fn)})))
 
