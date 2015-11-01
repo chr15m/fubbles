@@ -110,7 +110,7 @@
                 (recur now))
               ; entity is dead, dissasoc them
               (do
-                (print "killing" id)
+                (print "killing" id (entity :type))
                 (swap! game-state update-in [:entities] dissoc id)
                 (swap! dead-entities dissoc id)))))))
     ; return the entity we created
@@ -174,7 +174,6 @@
 
 ; create a single bubble-pop object
 (defn make-pop [position scale]
-  (print "make-pop" position scale)
   ; select one of the pop sprites randomly
   (make-entity! {:type :pop
                  :img (str "pop-" (+ (js/Math.floor (* 2 (rnd))) 1))
@@ -339,7 +338,8 @@
                 (if (not (= (.-type ev) "load"))
                   (print "There was an error loading one of the resources")
                   (do
-                    (<! (timeout (* (rnd) 200)))
+                    ; fake loader timeout
+                    ; (<! (timeout (* (rnd) 200)))
                     (let [basename (.replace (last (.split (.-src img) "/")) ".png" "")]
                       (swap! sprites assoc basename img))
                     (set! progress-bar.style.width (str (Math.round (* (- 1.0 (/ remaining num-urls)) 100.0)) "%"))
