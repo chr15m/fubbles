@@ -151,8 +151,8 @@
 ; update all of the player state depending on the gamepad input
 (defn update-player [old-state gamepad-object elapsed now]
   (if-let [gamepad @gamepad-object]
-    (let [!axes (.-axes gamepad)
-          gamepad-index (.-index gamepad)]
+    (let [!axes (aget gamepad "axes")
+          gamepad-index (aget gamepad "index")]
       (-> old-state
           (update-position elapsed !axes 0)
           (update-position elapsed !axes 1)
@@ -214,7 +214,7 @@
 (defn make-player! [gamepad-index gamepad-object]
   (log "Gamepad callback" gamepad-index @gamepad-object)
   (if @gamepad-object
-    (let [gamepad-index (.-index @gamepad-object)]
+    (let [gamepad-index (aget @gamepad-object "index")]
       (if (not (@players gamepad-index))
         (do
           (log "Making player with gamepad:" gamepad-index)
