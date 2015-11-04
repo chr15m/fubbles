@@ -1,0 +1,119 @@
+body {
+  width: 100%;
+  margin: 0px;
+  overflow: hidden;
+  height: 100%;
+  background-image: url("../img/bg.png");
+}
+
+a {
+  text-decoration: none;
+  color: #09f;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+audio { 
+  display:none;
+}
+
+#title {
+  width: 50%;
+  max-width: 1024px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5%;
+}
+
+#gamepad {
+  width: 25%;
+  max-width: 800px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5%;
+}
+
+#overlay {
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+}
+
+.sprite {
+  display: block;
+  position: fixed;
+  padding: 0px;
+}
+
+.cloud-sprite {
+  z-index: 50;
+}
+
+.bubble-sprite {
+  z-index: 99;
+}
+
+.player-sprite {
+  z-index: 100;
+}
+
+#progress-bar {
+  height: 3px;
+  background-color: #f60;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+/*** infinitelives spinner ***/
+
+.infinitelives-spinner {
+  width: 112px;
+  height: 96px;
+  background-size: 112px 96px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: infinitelives-heartbeat 1.3s ease 0s infinite normal none running;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAABgAQMAAAD/+GSTAAAABlBMVEUAAAD5aQnSkZnaAAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQffCQwDFhf1d1faAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAC9JREFUOMtjYGD4DwQwkmHYc//DAYg9krhgoWHPRY3hkcCFCTAwjBQuOGEzjAguAHqAPO46M2SkAAAAAElFTkSuQmCC);
+}
+
+@-webkit-keyframes infinitelives-heartbeat {
+  0% { opacity: 0.7;
+       transform: scale(1);}
+  5% { opacity: 1;
+       transform: scale(1.2);}
+  25% { opacity: 0.7;
+        transform: scale(1);}
+  32% { opacity: 1;
+        transform: scale(1.2);}
+  100% { opacity: 0.5;
+         transform: scale(0.95);}
+}
+
+@keyframes infinitelives-heartbeat {
+  0% { opacity: 0.7;
+       transform: scale(1);}
+  5% { opacity: 1;
+       transform: scale(1.2);}
+  25% { opacity: 0.7;
+        transform: scale(1);}
+  32% { opacity: 1;
+        transform: scale(1.2);}
+  100% { opacity: 0.5;
+         transform: scale(0.95);}
+}
+
+/* this is optional */
+
+.infinitelives-spinner-vertical-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -56px;
+  margin-top: -48px;
+}
+
