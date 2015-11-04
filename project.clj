@@ -35,7 +35,7 @@
                                     [:cljsbuild :builds :app :compiler :output-dir]
                                     [:cljsbuild :builds :app :compiler :output-to]]
 
-  :source-paths ["src/clj" "src/cljc"]
+  :source-paths ["src/clj" "src/cljc" "src/cljs"]
 
   :minify-assets
   {:assets
@@ -47,7 +47,14 @@
                                         :asset-path   "js/out"
                                         :optimizations :none
                                         :source-map true
-                                        :pretty-print  true}}}}
+                                        :pretty-print  true}}
+                       :min {:source-paths ["env/prod/cljs"]
+                             :compiler {:output-to "build/js/app.js"
+                                        :main "fubbles.prod"
+                                        ;:externs ["externs.js"]
+                                        ; :pseudo-names true
+                                        ;:pretty-print true
+                                        :optimizations :advanced}}}}
 
   :profiles {:dev {:repl-options {:init-ns fubbles.repl}
 
